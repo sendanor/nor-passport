@@ -1,0 +1,4 @@
+nor-passportjs
+==============
+
+PassportJS helpers
