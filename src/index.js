@@ -1,13 +1,17 @@
 /* Passport */
 
 var NoPg = require('nor-nopg');
-var passport = require('passport');
 var Flags = require('nor-flags');
 var is = require('nor-is');
 var debug = require('nor-debug');
 var copy = require('nor-data').copy;
 
-module.exports = function(opts) {
+var passport = require('passport');
+
+var mod = module.exports = {};
+
+/* */
+mod.setup = function(opts) {
 	opts = opts || {};
 	
 	// FIXME: check opts.pg
@@ -67,7 +71,12 @@ module.exports = function(opts) {
 		}).done();
 	});
 
-	return passport;
+	return mod;
 }
+
+/* Wrappers */
+mod.authenticate = passport.authenticate.bind(passport);
+mod.initialize = passport.initialize.bind(passport);
+mod.session = passport.session.bind(passport);
 
 /* EOF */

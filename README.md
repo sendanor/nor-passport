@@ -7,7 +7,8 @@ PassportJS helpers
 
 ```
 // Passport
-var passport = require('nor-passport')({  
+var passport = require('nor-passport');
+passport.setup({  
     'pg': config.pg,
     'types': {
        'User': types.User,
