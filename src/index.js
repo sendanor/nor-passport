@@ -13,6 +13,8 @@ var mod = module.exports = {};
 /* */
 mod.setup = function(opts) {
 	opts = opts || {};
+
+	//debug.log('opts = ', opts);
 	
 	// FIXME: check opts.pg
 	// FIXME: check opts.types
@@ -73,6 +75,35 @@ mod.setup = function(opts) {
 
 	return mod;
 }
+
+/* Express auth helpers */
+mod.setupHelpers = function() {
+	return function(req, res, next){
+		res.locals.isAuthenticated = req.isAuthenticated();
+		res.locals.user = res.locals.isAuthenticated ? req.user : undefined;
+		res.locals.profile = res.locals.user;
+
+		/* Setup `req.flags`, the user access flags. Even users that aren't connected will have some access flags. */
+		var flags = {
+			'public': true
+		};
+
+		req.flags = flags;
+		res.locals.flags = flags;
+
+		if(req.isAuthenticated() && is.obj(req.user)) {
+			flags.authenticated = true;
+		}
+
+		if(flags.authenticated && is.obj(req.user.flags) ) {
+			Object.keys(req.user.flags).forEach(function(flag) {
+				flags[flag] = is.true(req.user.flags[flag]);
+			});
+		}
+
+		next();
+	};
+};
 
 /* Wrappers */
 mod.authenticate = passport.authenticate.bind(passport);
