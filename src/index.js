@@ -79,6 +79,13 @@ mod.setup = function(opts) {
 /* Express auth helpers */
 mod.setupHelpers = function() {
 	return function(req, res, next){
+
+		debug.log('here');
+
+		debug.assert(req).is('object');
+		debug.assert(res).is('object');
+		debug.assert(next).is('function');
+
 		res.locals.isAuthenticated = req.isAuthenticated();
 		res.locals.user = res.locals.isAuthenticated ? req.user : undefined;
 		res.locals.profile = res.locals.user;
