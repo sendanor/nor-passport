@@ -49,7 +49,7 @@ mod.setup = function(opts) {
 		}).search(User)({'$id':id}, {'fields':['$id', '$type', '$created', 'email', 'groups', 'sites', 'flags']} ).then(function(db) {
 			user = NoPg.strip( db.fetchSingle() ).unset('$content').get();
 			user.orig = copy(user);
-			if(is.array(user.groups)) {
+			if(is.array(user.groups) && (user.groups.length >= 1)) {
 				return db.search(Group)( ['OR'].concat(user.groups.map(function(uuid) { return {'$id':uuid}; })) ).then(function(db) {
 					user.groups = db.fetch();
 					return db;
