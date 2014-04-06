@@ -79,7 +79,7 @@ module.exports = function(opts) {
 			debug.assert(done).is('function');
 			return done(null, user);
 		}).fail(function(err) {
-			debug.log('Error: ' + ((err && err.stack) || err));
+			debug.error( ((err && err.stack) || err) );
 			debug.assert(done).is('function');
 			if(_db) {
 				return _db.rollback().fin(function() { done(err); });
