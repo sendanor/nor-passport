@@ -32,6 +32,9 @@ mod.setup = function(opts) {
 	if(!is.string(Group)) {
 		debug.assert(Group).is('object').instanceOf(NoPg.Type);
 	}
+
+	opts.userFields = opts.userFields || ['$id', '$type', '$created', 'name', 'email', 'groups', 'sites', 'flags'];
+	debug.assert(opts.userFields).is('array');
 	
 	passport.use(require('./plugins/local')({"pg":opts.pg, "User": User, "usernameField": "email"}));
 	
@@ -46,7 +49,7 @@ mod.setup = function(opts) {
 		NoPg.start(opts.pg).then(function(db) {
 			_db = db;
 			return db;
-		}).search(User)({'$id':id}, {'fields':['$id', '$type', '$created', 'email', 'groups', 'sites', 'flags']} ).then(function(db) {
+		}).search(User)({'$id':id}, {'fields':opts.userFields} ).then(function(db) {
 			user = NoPg.strip( db.fetchSingle() ).unset('$content').get();
 			user.orig = copy(user);
 			if(is.array(user.groups) && (user.groups.length >= 1)) {
@@ -80,7 +83,7 @@ mod.setup = function(opts) {
 mod.setupHelpers = function() {
 	return function(req, res, next){
 
-		debug.log('here');
+		//debug.log('here');
 
 		debug.assert(req).is('object');
 		debug.assert(res).is('object');
