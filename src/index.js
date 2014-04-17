@@ -33,7 +33,7 @@ mod.setup = function(opts) {
 		debug.assert(Group).is('object').instanceOf(NoPg.Type);
 	}
 
-	opts.userFields = opts.userFields || ['$id', '$type', '$created', 'name', 'email', 'groups', 'sites', 'flags'];
+	opts.userFields = opts.userFields || ['$id', '$type', '$created', 'name', 'email', 'groups', 'flags'];
 	debug.assert(opts.userFields).is('array');
 	
 	passport.use(require('./plugins/local')({"pg":opts.pg, "User": User, "usernameField": "email"}));
