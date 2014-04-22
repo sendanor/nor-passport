@@ -51,6 +51,12 @@ mod.setup = function(opts) {
 			return db;
 		}).search(User)({'$id':id}, {'fields':opts.userFields} ).then(function(db) {
 			user = NoPg.strip( db.fetchSingle() ).unset('$content').get();
+
+			debug.assert(user.flags).is('object');
+			Object.keys(user.flags).forEach(function(key) {
+				debug.assert(user.flags[key]).is('boolean');
+			});
+	
 			user.orig = copy(user);
 			if(is.array(user.groups) && (user.groups.length >= 1)) {
 				return db.search(Group)( ['OR'].concat(user.groups.map(function(uuid) { return {'$id':uuid}; })) ).then(function(db) {
@@ -62,14 +68,29 @@ mod.setup = function(opts) {
 				return db;
 			}
 		}).commit().then(function(db) {
+
 			var flags = new Flags();
 			user.groups.forEach(function(g) {
+
+				// Make sure `g.flags` is correct
+				debug.assert(g.flags).is('object');
+				Object.keys(g.flags).forEach(function(key) {
+					debug.assert(g.flags[key]).is('boolean');
+				});
+
+				// Merge flags
 				flags = flags.merge(g.flags);
 			});
-	
+
 			user.flags = flags.merge(user.flags);
 			//debug.log('user = ', user);
-	
+
+			// Make sure `user.flags` is still correct
+			debug.assert(user.flags).is('object');
+			Object.keys(user.flags).forEach(function(key) {
+				debug.assert(user.flags[key]).is('boolean');
+			});
+
 			done(null, user);
 		}).fail(function(err) {
 			done(err);
