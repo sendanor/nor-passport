@@ -52,6 +52,12 @@ mod.setup = function(opts) {
 		}).search(User)({'$id':id}, {'fields':opts.userFields} ).then(function(db) {
 			user = NoPg.strip( db.fetchSingle() ).unset('$content').get();
 
+			// The public flag is special and should not be set false in the user record
+			if(user.flags && (user.flags['public'] !== undefined)) {
+				delete user.flags['public'];
+			}
+
+			// Make sure user.flags is correct
 			debug.assert(user.flags).is('object');
 			Object.keys(user.flags).forEach(function(key) {
 				debug.assert(user.flags[key]).is('boolean');
@@ -72,6 +78,11 @@ mod.setup = function(opts) {
 			var flags = new Flags();
 			user.groups.forEach(function(g) {
 
+				// The public flag is special and should not be set false in the group record
+				if(g.flags && (g.flags['public'] !== undefined)) {
+					delete g.flags['public'];
+				}
+
 				// Make sure `g.flags` is correct
 				debug.assert(g.flags).is('object');
 				Object.keys(g.flags).forEach(function(key) {
@@ -91,6 +102,8 @@ mod.setup = function(opts) {
 				debug.assert(user.flags[key]).is('boolean');
 			});
 
+			//debug.log('user.flags = ', user.flags);
+
 			done(null, user);
 		}).fail(function(err) {
 			done(err);
@@ -101,7 +114,13 @@ mod.setup = function(opts) {
 }
 
 /* Express auth helpers */
-mod.setupHelpers = function() {
+mod.setupHelpers = function(opts) {
+	opts = opts || {};
+	
+	if(!is.obj(opts.default_flags)) {
+		opts.default_flags = {};
+	}
+
 	return function(req, res, next){
 
 		//debug.log('here');
@@ -115,15 +134,15 @@ mod.setupHelpers = function() {
 		res.locals.profile = res.locals.user;
 
 		/* Setup `req.flags`, the user access flags. Even users that aren't connected will have some access flags. */
-		var flags = {
-			'public': true
-		};
+		var flags = copy(opts.default_flags);
 
 		req.flags = flags;
 		res.locals.flags = flags;
 
 		if(req.isAuthenticated() && is.obj(req.user)) {
 			flags.authenticated = true;
+		} else {
+			flags.authenticated = false;
 		}
 
 		if(flags.authenticated && is.obj(req.user.flags) ) {
@@ -131,6 +150,12 @@ mod.setupHelpers = function() {
 				flags[flag] = is.true(req.user.flags[flag]);
 			});
 		}
+
+		// Make sure `req.flags` is valid
+		debug.assert(req.flags).is('object');
+		Object.keys(req.flags).forEach(function(f) {
+			debug.assert(req.flags[f]).is('boolean');
+		});
 
 		next();
 	};
