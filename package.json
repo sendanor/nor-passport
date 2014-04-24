@@ -1,6 +1,6 @@
 {
   "name": "nor-passport",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "PassportJS with NoPg setup",
   "main": "src/index.js",
   "scripts": {
@@ -24,9 +24,9 @@
   "dependencies": {
     "nor-debug": ">= 0.1.32 < 0.2.0",
     "nor-is": ">= 0.1.11 <0.2.0",
-    "nor-data": ">= 0.0.5 <0.1.0",
-    "nor-flags": ">= 0.2.0 <0.3.0",
-    "nor-nopg": ">= 0.1.39 <0.2.0",
+    "nor-data": ">= 0.0.6 <0.1.0",
+    "nor-flags": ">= 0.2.1 <0.3.0",
+    "nor-nopg": ">= 0.1.40 <0.2.0",
     "passport": ">= 0.2.0 <0.3.0",
     "passport-local": ">= 0.1.6 <0.2.0",
     "crypt3": ">= 0.1.4 <0.2.0"
