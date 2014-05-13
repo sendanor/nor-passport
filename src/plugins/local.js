@@ -45,7 +45,7 @@ module.exports = function(opts) {
 
 		var _db;
 		var where = {};
-		where[usernameField] = username;
+		where[usernameField] = username.toLowerCase();
 
 		//debug.log('where = ', where);
 
