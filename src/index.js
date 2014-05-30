@@ -10,6 +10,8 @@ var passport = require('passport');
 
 var mod = module.exports = {};
 
+mod.internal = passport;
+
 /* */
 mod.setup = function(opts) {
 	opts = opts || {};
