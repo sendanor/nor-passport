@@ -35,6 +35,8 @@ mod.setup = function(opts) {
 		debug.assert(Group).is('object').instanceOf(NoPg.Type);
 	}
 
+	debug.assert(opts.user_view).ignore(undefined).is('object');
+
 	opts.userFields = opts.userFields || ['$id', '$type', '$created', 'name', 'email', 'groups', 'flags'];
 	debug.assert(opts.userFields).is('array');
 	
