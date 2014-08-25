@@ -1,6 +1,6 @@
 {
   "name": "nor-passport",
-  "version": "0.2.4",
+  "version": "0.2.5",
   "description": "PassportJS with NoPg setup",
   "main": "src/index.js",
   "scripts": {
@@ -22,13 +22,15 @@
   },
   "homepage": "https://github.com/sendanor/nor-passport",
   "dependencies": {
-    "nor-debug"      : ">= 0.1.38 < 0.2.0",
+    "nor-debug"      : ">= 0.1.41 < 0.2.0",
     "nor-is"         : ">= 0.1.13 < 0.2.0",
-    "nor-data"       : ">= 0.0.8  < 0.1.0",
-    "nor-flags"      : ">= 0.2.3  < 0.3.0",
-    "nor-nopg"       : ">= 0.1.52 < 0.2.0",
+    "nor-data"       : ">= 0.0.10  < 0.1.0",
+    "nor-flags"      : ">= 0.2.4  < 0.3.0",
     "crypt3"         : ">= 0.1.5  < 0.2.0",
     "passport"       : ">= 0.2.0  < 0.3.0",
     "passport-local" : ">= 0.1.6  < 0.2.0"
+  },
+  "peerDependencies": {
+    "nor-nopg"       : ">= 0.1.66 < 0.2.0"
   }
 }
