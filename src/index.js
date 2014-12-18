@@ -5,6 +5,7 @@ var Flags = require('nor-flags');
 var is = require('nor-is');
 var debug = require('nor-debug');
 var copy = require('nor-data').copy;
+var FUNCTION = require('nor-function');
 
 var passport = require('passport');
 
@@ -166,8 +167,8 @@ mod.setupHelpers = function(opts) {
 };
 
 /* Wrappers */
-mod.authenticate = passport.authenticate.bind(passport);
-mod.initialize = passport.initialize.bind(passport);
-mod.session = passport.session.bind(passport);
+mod.authenticate = FUNCTION(passport.authenticate).bind(passport);
+mod.initialize = FUNCTION(passport.initialize).bind(passport);
+mod.session = FUNCTION(passport.session).bind(passport);
 
 /* EOF */
