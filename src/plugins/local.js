@@ -4,7 +4,7 @@
 
 var is = require('nor-is');
 var debug = require('nor-debug');
-var nordata = require('nor-data');
+//var nordata = require('nor-data');
 var util = require('util');
 var NoPg = require('nor-nopg');
 var Strategy = require('passport-local').Strategy;
@@ -24,9 +24,9 @@ module.exports = function(opts) {
 	var usernameField = opts.usernameField || 'username';
 	var passwordField = opts.passwordField || 'password';
 
-    if(!is.string(User)) {
-        debug.assert(User).is('object').instanceOf(NoPg.Type);
-    }
+	if(!is.string(User)) {
+		debug.assert(User).is('object').instanceOf(NoPg.Type);
+	}
 
 	debug.assert(usernameField).is('string');
 	debug.assert(passwordField).is('string');

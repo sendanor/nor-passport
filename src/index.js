@@ -1,13 +1,16 @@
 /* Passport */
 
+"use strict";
+
 var NoPg = require('nor-nopg');
 var Flags = require('nor-flags');
 var is = require('nor-is');
 var debug = require('nor-debug');
 var copy = require('nor-data').copy;
 var FUNCTION = require('nor-function');
-
+var ARRAY = require('nor-array');
 var passport = require('passport');
+var plugins_local = require('./plugins/local');
 
 var mod = module.exports = {};
 
@@ -18,12 +21,12 @@ mod.setup = function(opts) {
 	opts = opts || {};
 
 	//debug.log('opts = ', opts);
-	
+
 	// FIXME: check opts.pg
 	// FIXME: check opts.types
 	// FIXME: check opts.types.User
 	// FIXME: check opts.types.Group
-	
+
 	var types = opts.types || {};
 	var User = types.User || 'User';
 	var Group = types.Group || 'Group';
@@ -40,14 +43,14 @@ mod.setup = function(opts) {
 
 	opts.userFields = opts.userFields || ['$id', '$type', '$created', 'name', 'email', 'groups', 'flags'];
 	debug.assert(opts.userFields).is('array');
-	
-	passport.use(require('./plugins/local')({"pg":opts.pg, "User": User, "usernameField": "email"}));
-	
-	/** Serialize NoPg user object */	
+
+	passport.use( plugins_local({"pg":opts.pg, "User": User, "usernameField": "email"}));
+
+	/** Serialize NoPg user object */
 	passport.serializeUser(function(user, done) {
 		done(null, user.$id);
 	});
-	
+
 	/** Deserialize NoPg user object */
 	passport.deserializeUser(function(id, done) {
 		var _db, user;
@@ -64,13 +67,13 @@ mod.setup = function(opts) {
 
 			// Make sure user.flags is correct
 			debug.assert(user.flags).is('object');
-			Object.keys(user.flags).forEach(function(key) {
+			ARRAY(Object.keys(user.flags)).forEach(function(key) {
 				debug.assert(user.flags[key]).is('boolean');
 			});
-	
+
 			user.orig = copy(user);
 			if(is.array(user.groups) && (user.groups.length >= 1)) {
-				return db.search(Group)( ['OR'].concat(user.groups.map(function(uuid) { return {'$id':uuid}; })) ).then(function(db) {
+				return db.search(Group)( ['OR'].concat( ARRAY(user.groups).map(function(uuid) { return {'$id':uuid}; })).valueOf() ).then(function(db) {
 					user.groups = db.fetch();
 					return db;
 				});
@@ -78,10 +81,10 @@ mod.setup = function(opts) {
 				user.groups = [];
 				return db;
 			}
-		}).commit().then(function(db) {
+		}).commit().then(function(/*db*/) {
 
 			var flags = new Flags();
-			user.groups.forEach(function(g) {
+			ARRAY(user.groups).forEach(function(g) {
 
 				// The public flag is special and should not be set false in the group record
 				if(g.flags && (g.flags['public'] !== undefined)) {
@@ -90,7 +93,7 @@ mod.setup = function(opts) {
 
 				// Make sure `g.flags` is correct
 				debug.assert(g.flags).is('object');
-				Object.keys(g.flags).forEach(function(key) {
+				ARRAY(Object.keys(g.flags)).forEach(function(key) {
 					debug.assert(g.flags[key]).is('boolean');
 				});
 
@@ -103,7 +106,7 @@ mod.setup = function(opts) {
 
 			// Make sure `user.flags` is still correct
 			debug.assert(user.flags).is('object');
-			Object.keys(user.flags).forEach(function(key) {
+			ARRAY(Object.keys(user.flags)).forEach(function(key) {
 				debug.assert(user.flags[key]).is('boolean');
 			});
 
@@ -116,12 +119,12 @@ mod.setup = function(opts) {
 	});
 
 	return mod;
-}
+};
 
 /* Express auth helpers */
 mod.setupHelpers = function(opts) {
 	opts = opts || {};
-	
+
 	if(!is.obj(opts.default_flags)) {
 		opts.default_flags = {};
 	}
@@ -151,14 +154,14 @@ mod.setupHelpers = function(opts) {
 		}
 
 		if(flags.authenticated && is.obj(req.user.flags) ) {
-			Object.keys(req.user.flags).forEach(function(flag) {
+			ARRAY(Object.keys(req.user.flags)).forEach(function(flag) {
 				flags[flag] = is.true(req.user.flags[flag]);
 			});
 		}
 
 		// Make sure `req.flags` is valid
 		debug.assert(req.flags).is('object');
-		Object.keys(req.flags).forEach(function(f) {
+		ARRAY(Object.keys(req.flags)).forEach(function(f) {
 			debug.assert(req.flags[f]).is('boolean');
 		});
 
