@@ -72,16 +72,26 @@ mod.setup = function(opts) {
 			});
 
 			user.orig = copy(user);
+
+			//debug.log('user.groups = ', user.groups);
+
 			if(is.array(user.groups) && (user.groups.length >= 1)) {
-				return db.search(Group)( ['OR'].concat( ARRAY(user.groups).map(function(uuid) { return {'$id':uuid}; })).valueOf() ).then(function(db) {
-					user.groups = db.fetch();
+				var where = ['OR'].concat( ARRAY(user.groups).map(function(uuid) { return {'$id':uuid}; }).valueOf() );
+				return db.search(Group)(where).then(function(db) {
+					user.groups = ARRAY( db.fetch() ).map(function(g) {
+						return NoPg.strip( g ).unset('$content').unset('$events').get();
+					}).valueOf();
+					//debug.log('user.groups = ', user.groups);
 					return db;
 				});
 			} else {
 				user.groups = [];
+				//debug.log('user.groups = ', user.groups);
 				return db;
 			}
 		}).commit().then(function(/*db*/) {
+
+			//debug.log('user.groups = ', user.groups);
 
 			var flags = new Flags();
 			ARRAY(user.groups).forEach(function(g) {
