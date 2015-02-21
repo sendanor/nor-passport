@@ -1,6 +1,6 @@
 {
   "name": "nor-passport",
-  "version": "0.2.20",
+  "version": "0.2.21",
   "description": "PassportJS with NoPg setup",
   "main": "src/index.js",
   "scripts": {
