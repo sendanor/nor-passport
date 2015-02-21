@@ -27,6 +27,9 @@ mod.setup = function(opts) {
 	// FIXME: check opts.types.User
 	// FIXME: check opts.types.Group
 
+	debug.assert(opts.documents).ignore(undefined).is('object');
+	var documents = copy(opts.documents) || null;
+
 	var types = opts.types || {};
 	var User = types.User || 'User';
 	var Group = types.Group || 'Group';
@@ -48,16 +51,30 @@ mod.setup = function(opts) {
 
 	/** Serialize NoPg user object */
 	passport.serializeUser(function(user, done) {
+		debug.assert(user).is('object');
+		debug.assert(done).is('function');
 		done(null, user.$id);
 	});
 
 	/** Deserialize NoPg user object */
-	passport.deserializeUser(function(id, done) {
+	passport.deserializeUser(function(req, id, done) {
+
+		debug.assert(req).is('object');
+		debug.assert(id).is('uuid');
+		debug.assert(done).is('function');
+
 		var _db, user;
+
+		var traits = {};
+		if(documents) {
+			traits.documents = documents;
+		}
+		traits.fields = opts.userFields;
+
 		NoPg.start(opts.pg).then(function(db) {
 			_db = db;
 			return db;
-		}).search(User)({'$id':id}, {'fields':opts.userFields} ).then(function(db) {
+		}).search(User)({'$id':id}, traits).then(function(db) {
 			user = NoPg.strip( db.fetchSingle() ).unset('$content').get();
 
 			// The public flag is special and should not be set false in the user record
@@ -74,6 +91,17 @@ mod.setup = function(opts) {
 			user.orig = copy(user);
 
 			//debug.log('user.groups = ', user.groups);
+
+			if(!opts.user_view) {
+				return db;
+			}
+
+			return opts.user_view.element(req, {})(user).then(function(body) {
+				user = body;
+				return db;
+			});
+
+		}).then(function(db) {
 
 			if(is.array(user.groups) && (user.groups.length >= 1)) {
 				var where = ['OR'].concat( ARRAY(user.groups).map(function(uuid) { return {'$id':uuid}; }).valueOf() );
