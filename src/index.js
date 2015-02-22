@@ -2,6 +2,7 @@
 
 "use strict";
 
+var _Q = require('q');
 var NoPg = require('nor-nopg');
 var Flags = require('nor-flags');
 var is = require('nor-is');
@@ -74,8 +75,8 @@ mod.setup = function(opts) {
 		NoPg.start(opts.pg).then(function(db) {
 			_db = db;
 			return db;
-		}).search(User)({'$id':id}, traits).then(function(db) {
-			user = NoPg.strip( db.fetchSingle() ).unset('$content').get();
+		}).searchSingle(User)({'$id':id}, traits).then(function(db) {
+			user = NoPg.strip( db.fetch() ).unset('$content').get();
 
 			// The public flag is special and should not be set false in the user record
 			if(user.flags && (user.flags['public'] !== undefined)) {
@@ -96,8 +97,16 @@ mod.setup = function(opts) {
 				return db;
 			}
 
-			return opts.user_view.element(req, {})(user).then(function(body) {
+			//debug.log('user.$documents = ', user.$documents);
+
+			return _Q.when(opts.user_view.element({
+				"user": user,
+				"flags": user.flags,
+				"session": req.session,
+				"url": req.url
+			}, {})(user)).then(function(body) {
 				user = body;
+				//debug.log('user.$documents = ', user.$documents);
 				return db;
 			});
 
