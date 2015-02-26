@@ -7,6 +7,7 @@ var NoPg = require('nor-nopg');
 var Flags = require('nor-flags');
 var is = require('nor-is');
 var debug = require('nor-debug');
+var merge = require('merge');
 var copy = require('nor-data').copy;
 var FUNCTION = require('nor-function');
 var ARRAY = require('nor-array');
@@ -99,12 +100,10 @@ mod.setup = function(opts) {
 
 			//debug.log('user.$documents = ', user.$documents);
 
-			return _Q.when(opts.user_view.element({
+			return _Q.when(opts.user_view.element(merge(true, req, {
 				"user": user,
-				"flags": user.flags,
-				"session": req.session,
-				"url": req.url
-			}, {})(user)).then(function(body) {
+				"flags": user.flags
+			}), {})(user)).then(function(body) {
 				user = body;
 				//debug.log('user.$documents = ', user.$documents);
 				return db;
