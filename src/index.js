@@ -7,7 +7,6 @@ var NoPg = require('nor-nopg');
 var Flags = require('nor-flags');
 var is = require('nor-is');
 var debug = require('nor-debug');
-var merge = require('merge');
 var copy = require('nor-data').copy;
 var FUNCTION = require('nor-function');
 var ARRAY = require('nor-array');
@@ -17,6 +16,24 @@ var plugins_local = require('./plugins/local');
 var mod = module.exports = {};
 
 mod.internal = passport;
+
+/** Copy properties from `params` to new limited copy of `req`
+ * @returns {object} Limited copy of `req` with new properties from `params`
+ */
+function copy_req(req, params) {
+	debug.assert(req).is('object');
+	debug.assert(params).is('object');
+	var tmp = {};
+	ARRAY(['headers', 'url', 'connection', 'flags', 'user', 'session']).forEach(function(key) {
+		if(req.hasOwnProperty(key)) {
+			tmp[key] = req[key];
+		}
+	});
+	ARRAY(Object.keys(params)).forEach(function(key) {
+		tmp[key] = params[key];
+	});
+	return tmp;
+}
 
 /* */
 mod.setup = function(opts) {
@@ -100,10 +117,14 @@ mod.setup = function(opts) {
 
 			//debug.log('user.$documents = ', user.$documents);
 
-			return _Q.when(opts.user_view.element(merge(true, req, {
+			var req_copy = copy_req(req, {
 				"user": user,
 				"flags": user.flags
-			}), {})(user)).then(function(body) {
+			});
+
+			//debug.log('req_copy = ', req_copy);
+
+			return _Q.when(opts.user_view.element(req_copy, {})(user)).then(function(body) {
 				user = body;
 				//debug.log('user.$documents = ', user.$documents);
 				return db;
